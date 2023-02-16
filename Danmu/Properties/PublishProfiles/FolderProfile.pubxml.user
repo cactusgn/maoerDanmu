@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Users\ngu\Source\Repos\Danmu\bin\Release\netcoreapp3.1\publish\</_PublishTargetUrl>
+    <History>True|2023-02-04T15:19:34.7463286Z;True|2023-02-04T23:16:49.4359655+08:00;True|2023-01-16T11:22:40.8587423+08:00;True|2023-01-10T19:39:40.3520726+08:00;</History>
+  </PropertyGroup>
+</Project>

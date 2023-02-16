@@ -1,0 +1,231 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/index.min.css"/>
+    <link rel="stylesheet" href="./css/common.css"/>
+    <link rel="stylesheet" href="./css/bundle.8eb52b5d.css"/>
+    <script src="https://cdn.staticfile.org/jquery/2.0.0/jquery.min.js">
+    </script>
+    <title>弹幕</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        html, body {
+            height: 100%;
+            user-select: none;
+        }
+
+        #screen {
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+            bottom: 50px;
+            background-color: rgba(0,0,0,0.8);
+            background-image: url(img/Image 7.png);
+            background-repeat: no-repeat;
+            background-size: auto 100%;
+            background-position: center;
+            margin: auto 0;
+        }
+
+            #screen:hover {
+                cursor: pointer;
+            }
+
+        .bottomDm {
+            position: absolute;
+            z-index: 11;
+            bottom: 5px;
+            font-size: 24px;
+            color: white;
+            height: 34px;
+            text-align: center;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            white-space: nowrap;
+            visibility: hidden;
+            text-shadow: rgb(0, 0, 0) 1px 0px 1px, rgb(0, 0, 0) 0px 1px 1px, rgb(0, 0, 0) 0px -1px 1px, rgb(0, 0, 0) -1px 0px 1px;
+        }
+
+        .box {
+            will-change: transform;
+            position: absolute;
+            top: 44px;
+            right: -658px;
+            color: white;
+            font-size: 24px;
+            /* visibility: visible; */
+            height: 34px;
+            white-space: nowrap;
+            /* animation:barrage 10s linear 0s; */
+        }
+
+        @keyframes barrage {
+            from {
+                visibility: visible;
+                transform: translateX(0);
+            }
+
+            to {
+                visibility: visible;
+                transform: translateX(calc(-1918px - 100%));
+            }
+        }
+
+        @keyframes bottomAnimation {
+            from {
+                visibility: visible;
+            }
+
+            to {
+                visibility: hidden;
+            }
+        }
+
+        footer {
+            height: 50px;
+            width: 100%;
+            background-color: rgba(0,0,0,.7);
+            position: absolute;
+            z-index: 10;
+            bottom: 0px;
+            left: 0px;
+        }
+
+        #urlbox, #idbox {
+            height: 50px;
+            position: absolute;
+            width: 400px;
+            background-color: black;
+            bottom: 50px;
+            right: 0px;
+            padding: 0px;
+            text-align: left;
+            line-height: 50px;
+            padding: 0 9px;
+            z-index: 12;
+            color: white;
+            font-size: 20px;
+        }
+
+            #urlbox select, #idbox #idinput {
+                border: black 1px solid;
+                padding: 3px;
+                width: 330px;
+                font-size: 20px;
+                position: absolute;
+                right: 20px;
+                top: 10px;
+            }
+
+            #idbox #idinput {
+                width: 200px;
+                right: 150px;
+            }
+
+        #getDmBtn {
+            font-size: 20px;
+            width: 100px;
+            color: black;
+            height: 34px;
+            line-height: 34px;
+            vertical-align: middle;
+            border-radius: 10px;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: white;
+        }
+
+        #idbox {
+            bottom: 100px;
+        }
+
+        .mpb {
+            margin-left: 20px;
+            cursor: pointer;
+        }
+        
+    </style>
+</head>
+<body>
+    <audio id="audio" src="">对不起您的浏览器不支持音频播放，请升级浏览器</audio>
+    <div id="screen">
+        <!--<div class="box"><div>对不起您的浏览器不支持音频播放，请升级浏览器</div></div>-->
+    </div>
+    <div id="m">
+        <footer id="mp">
+            <div id="mpb" class="mpb">
+                <!-- 播放器最底层 -->
+                <div class="mpo"></div>
+                <!-- 播放器预加载条 -->
+                <div class="mppl" style="width: 100%;"></div>
+                <!-- 播放器加载条 -->
+                <div id="mpl" class="mpl" style="width: 0%;"></div>
+                <!-- 播放器圆点 -->
+                <div class="mplr ui-draggable ui-draggable-handle pause" style="left: 3.20777%;"><i></i></div>
+            </div>
+            <!-- 播放器时间 -->
+            <div class="mptime">
+                <div id="mpsp" class="mpsp">0:00</div>
+                <div class="mpslash">/</div>
+                <div id="mpsa" class="mpsa">0:00</div>
+            </div>
+            <!-- 播放器按钮 -->
+            <ul class="left-side-buttons">
+                <li id="mpiprev" title="上一首">
+                    <i></i>
+                </li>
+                <li id="mpi" class="mpi soundloaded" data-loadtype="web" data-userid="3490681" title="播放">
+                    <i></i>
+                </li>
+                <li id="mpinext" title="下一首">
+                    <i></i>
+                </li>
+                <li id="mpiloop" class="mpiplaypl" title="列表播放">
+                    <i></i>
+                    <div id="loopMessage"></div>
+                </li>
+            </ul>
+            <ul class="right-side-buttons mpc" onselectstart="return false;">
+                <li id="switch-quality" class="high"></li>
+                <li id="fullScreen" title="全屏"><i></i></li>
+                <li class="mpsv" title="音量">
+                    <i class="mpsv-btn"></i>
+                    <div class="mpsvo">
+                        <label class="volume-label">100</label>
+                        <div class="mpsvb ui-slider ui-slider-vertical ui-widget ui-widget-content ui-corner-all">
+                            <div class="ui-slider-range ui-widget-header ui-corner-all ui-slider-range-min" style="height: 100%;"></div><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="bottom: 100%;"></span>
+                        </div>
+                    </div>
+                </li>
+                <li id="playlist-btn" title="播放列表">
+                    <i><span class="count">3</span></i>
+                    <div class="notice" style="display: none;">+1</div>
+                    <div id="playlist-container" style="display: none;">
+                        <div class="title">
+                            播放列表
+                            <div class="addall" title="收藏列表"><span class="addallbtn"></span>收藏列表</div>
+                            <div class="clearall" title="清空列表"><span class="clearallbtn"></span>清空列表</div>
+                        </div>
+                    </div>
+
+            </ul>
+            </li>
+            <div id="urlbox">url：<select id="urlinput" type="text" /><option>aaa</option></select></div>
+            <div id="idbox">
+                ID:<input id="idinput" type="text" value="" />
+                <input type="button" id="getDmBtn" value="获取弹幕" />
+            </div>
+        </footer>
+    </div>
+    <script type="text/javascript" src="./js/dm.js"></script>
+</body>
+</html>
