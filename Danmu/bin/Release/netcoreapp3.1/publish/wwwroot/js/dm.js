@@ -20,7 +20,7 @@ audioSrc.addEventListener("canplay", function () {
     console.log("音频长度=>>>：", parseInt(audioSrc.duration) + '秒', '音频时分秒格式：', timeToMinute(parseInt(audioSrc
         .duration)));
     audioDuration.innerText = timeToMinute(parseInt(audioSrc.duration));
-	
+
 });
 
 //每秒刷新一次
@@ -35,17 +35,17 @@ var timer = setInterval(() => {
 var play = document.getElementById("mpi");
 var screenItem = document.getElementById("screen");
 var isplay = false;
-var dmSpeed = 200;
+var dmSpeed = 150;
 //设置页面图片
 //screenItem.style.backgroundImage = "../img/cover.jpg";
 var playcontrol = function () {
-    if (isplay) {
+    if (isplay && !IsVisible(captionList)) {
         audioSrc.pause();
         isplay = false;
         play.classList.remove("mpip");
         var x = document.querySelectorAll('.box,.bottomDm');
-        if(x){
-            for(let i = 0; i< x.length; i++){
+        if (x) {
+            for (let i = 0; i < x.length; i++) {
                 x[i].style.animationPlayState = 'paused';
             }
         }
@@ -56,12 +56,12 @@ var playcontrol = function () {
             isplay = true;
             play.classList.add("mpip");
             var x = document.querySelectorAll('.box,.bottomDm');
-            if(x){
-                for(let i = 0; i< x.length; i++){
+            if (x) {
+                for (let i = 0; i < x.length; i++) {
                     x[i].style.animationPlayState = '';
                 }
-            } 
-            
+            }
+
         }
     }
 }
@@ -170,7 +170,7 @@ function isFileExisted(url) {
     }
 };
 var alldm = [];
-var getHexColor = function(e) {
+var getHexColor = function (e) {
     return "#" + ("000000" + e.toString(16)).slice(-6)
 }
 var processDanmu = function (data) {
@@ -179,15 +179,12 @@ var processDanmu = function (data) {
         dataType: 'xml',
         type: 'GET',
         timeout: 2000,
-        error: function(xml)
-        {
+        error: function (xml) {
             console.log("加载XML 文件出错！");
         },
-        success: function(xml)
-        {
+        success: function (xml) {
             alldm = [];
-            $(xml).find("d").each(function(i)
-            {
+            $(xml).find("d").each(function (i) {
                 var l = $(this).attr("p").split(",");
                 var value = $(this).text();
                 alldm.push({
@@ -201,116 +198,119 @@ var processDanmu = function (data) {
                     dmid: String(l[7]),
                     text: String(value).replace(/(\n|\r\n)/g, "\r"),
                 });
-               
+
             });
-            alldm.sort((x,y)=>x.stime-y.stime);
+            alldm.sort((x, y) => x.stime - y.stime);
             loaddm();
+            tempdm = alldm.filter(x => (x.mode == 4)).sort((x, y) => x.stime - y.stime);
+            loadCaptions(tempdm);
+            captionList.style.display = "none";
         }
     });
 }
 var subLoaddmSI;
-var loaddm = function(){
+var loaddm = function () {
     let i = 1; k = 0;
     var subLoaddm = function () {
         let tempdm = [], tempbottomdm = [], numberOfDmOneTime = 15;
-        if(isplay){
-            if(audioSrc.currentTime!==0){
-                tempdm = alldm.filter(x=>(x.stime>=audioSrc.currentTime&&x.stime<audioSrc.currentTime+1&&x.mode!=4)).sort((x,y)=>x.stime-y.stime);
+        if (isplay) {
+            if (audioSrc.currentTime !== 0) {
+                tempdm = alldm.filter(x => (x.stime >= audioSrc.currentTime && x.stime < audioSrc.currentTime + 1 && x.mode != 4)).sort((x, y) => x.stime - y.stime);
                 k = 0;
                 i = 1;
-                if(isDragProgressBar){
+                if (isDragProgressBar) {
                     initializeShowDM();
                     initializeBottomDM();
                     isDragProgressBar = false;
                 }
             }
-            else{
+            else {
                 tempdm = alldm;
             }
-            tempbottomdm = alldm.filter(x=>(x.stime>=audioSrc.currentTime&&x.stime<audioSrc.currentTime+1&&x.mode==4)).sort((x,y)=>x.stime-y.stime);
+            tempbottomdm = alldm.filter(x => (x.stime >= audioSrc.currentTime && x.stime < audioSrc.currentTime + 1 && x.mode == 4)).sort((x, y) => x.stime - y.stime);
         }
-        if(k+1< tempdm.length){
-            let end = k+numberOfDmOneTime<tempdm.length? i*numberOfDmOneTime: tempdm.length;
+        if (k + 1 < tempdm.length) {
+            let end = k + numberOfDmOneTime < tempdm.length ? i * numberOfDmOneTime : tempdm.length;
             let identifier = audioSrc.currentTime.toString();
-            for (object of tempdm.slice((i-1)*numberOfDmOneTime,end)){
-                let topResult = getTop( object.text,object.stime);
-                if(topResult){
+            for (object of tempdm.slice((i - 1) * numberOfDmOneTime, end)) {
+                let topResult = getTop(object.text, object.stime);
+                if (topResult) {
                     var dm = document.createElement("div");
                     k++;
                     dm.innerText = object.text;
                     dm.classList.add("box");
                     dm.style.position = 'absolute';
-                    dm.style.top = topResult.top+'px';
+                    dm.style.top = topResult.top + 'px';
                     dm.style.right = -topResult.calcWidth + "px";
                     dm.style.color = object.color;
                     dm.style.height = '34px';
                     let dragtime = object.stime - audioSrc.currentTime;
-                    dm.style.animation = 'barrage ' + (topResult.calcWidth+1918)/dmSpeed +'s linear '+ dragtime +'s';
+                    dm.style.animation = 'barrage ' + (topResult.calcWidth + 1918) / dmSpeed + 's linear ' + dragtime + 's';
                     dm.addEventListener("webkitAnimationEnd", function () {
                         //this.dataset.finishAnimation=true;
                         this.parentNode.removeChild(this);
-                      }, false);
-                    if(isplay)
+                    }, false);
+                    if (isplay)
                         dm.style.animationPlayState = '';
-                    else{
+                    else {
                         dm.style.animationPlayState = 'paused';
                     }
-                    dm.id = k+identifier;
+                    dm.id = k + identifier;
                     $('#screen').append(dm);
                 }
             }
-            i++;   
+            i++;
         }
         //载入底层弹幕
-        for(object of tempbottomdm){
+        for (object of tempbottomdm) {
             let bottom = getBottom(object.text, object.stime);
-            if(bottom){
+            if (bottom) {
                 var dm = document.createElement("div");
                 dm.innerText = object.text;
                 dm.classList.add("bottomDm");
-                dm.style.bottom = bottom+'px';
+                dm.style.bottom = bottom + 'px';
                 dm.style.color = object.color;
                 let dragtime = object.stime - audioSrc.currentTime;
-                dm.style.animation = 'bottomAnimation ' + object.text.length/3 +'s linear '+ dragtime +'s';
+                dm.style.animation = 'bottomAnimation ' + object.text.length / 3 + 's linear ' + dragtime + 's';
                 dm.dataset.finishAnimation = false;
-                    dm.addEventListener("webkitAnimationEnd", function () {
-                        //this.dataset.finishAnimation=true;
-                        this.parentNode.removeChild(this);
-                      }, false);
-                    if(isplay)
-                        dm.style.animationPlayState = '';
-                    else{
-                        dm.style.animationPlayState = 'paused';
-                    }
+                dm.addEventListener("webkitAnimationEnd", function () {
+                    //this.dataset.finishAnimation=true;
+                    this.parentNode.removeChild(this);
+                }, false);
+                if (isplay)
+                    dm.style.animationPlayState = '';
+                else {
+                    dm.style.animationPlayState = 'paused';
+                }
                 $('#screen').append(dm);
             }
         }
     }
     subLoaddm();
-    if(subLoaddmSI===undefined)
-        subLoaddmSI = setInterval(subLoaddm,1000);
+    if (subLoaddmSI === undefined)
+        subLoaddmSI = setInterval(subLoaddm, 1000);
 }
 var totalHeight = screen.height;
 var margin = 5;
 var fontsize = 30;
-var totalLines = parseInt(totalHeight / (fontsize+2*margin))-4;
+var totalLines = parseInt(totalHeight / (fontsize + 2 * margin)) - 2;
 var bottomDm = [];
 var allshowDm = [];
 var initializeShowDM = function () {
     allshowDm = [];
-    for (let i= 0; i<totalLines; i++){
+    for (let i = 0; i < totalLines; i++) {
         allshowDm.push([]);
     }
 };
-var initializeBottomDM = function(){
+var initializeBottomDM = function () {
     bottomDm = [];
-    for(let i = 0; i<8; i++){
+    for (let i = 0; i < 8; i++) {
         bottomDm.push([]);
     }
 }
 initializeShowDM();
 initializeBottomDM();
-var getTop = function(text, delaytime){
+var getTop = function (text, delaytime) {
     let line = 0;
     let findline = false;
     var tempObj = document.createElement("span");
@@ -319,42 +319,42 @@ var getTop = function(text, delaytime){
     $('body').append(tempObj);
     let calcWidth = tempObj.offsetWidth;
     tempObj.parentNode.removeChild(tempObj);
-    for(let i = 0; i<allshowDm.length; i++){
+    for (let i = 0; i < allshowDm.length; i++) {
         let currentRow = allshowDm[i];
-        if(currentRow.length===0){
-            currentRow.push([calcWidth, delaytime,text]);
+        if (currentRow.length === 0) {
+            currentRow.push([calcWidth, delaytime, text]);
             findline = true;
             line = i;
             break;
-        }else{
-            if (((currentRow[currentRow.length-1][0]+150)/dmSpeed) < (delaytime - currentRow[currentRow.length-1][1])){
+        } else {
+            if (((currentRow[currentRow.length - 1][0] + 150) / dmSpeed) < (delaytime - currentRow[currentRow.length - 1][1])) {
                 findline = true;
-                currentRow.push([calcWidth, delaytime,text]);
+                currentRow.push([calcWidth, delaytime, text]);
                 line = i;
                 break;
             }
         }
     }
-    if(findline){
+    if (findline) {
         return {
-                top: (line+1)*(fontsize+margin)+15,
-                calcWidth:calcWidth
-               };
-    }else{
+            top: line * (fontsize + margin) + 5,
+            calcWidth: calcWidth
+        };
+    } else {
         return null;
     }
 }
-var getBottom = function(text, delaytime){
-    let line = 0; 
-    for(let i = 0; i<bottomDm.length; i++){
+var getBottom = function (text, delaytime) {
+    let line = 0;
+    for (let i = 0; i < bottomDm.length; i++) {
         let currentRow = bottomDm[i];
-        if(currentRow.length ===0){
+        if (currentRow.length === 0) {
             currentRow.push([text.length, delaytime]);
             findline = true;
             line = i;
             break;
-        }else{
-            if(currentRow[currentRow.length-1][0]/3<delaytime-currentRow[currentRow.length-1][1]){
+        } else {
+            if (currentRow[currentRow.length - 1][0] / 3 < delaytime - currentRow[currentRow.length - 1][1]) {
                 currentRow.push([text.length, delaytime]);
                 findline = true;
                 line = i;
@@ -362,9 +362,9 @@ var getBottom = function(text, delaytime){
             }
         }
     }
-    if(findline){
-        return line*(fontsize+margin)+5;
-    }else{
+    if (findline) {
+        return line * (fontsize + margin) + 5;
+    } else {
         return null;
     }
 }
@@ -383,7 +383,12 @@ urlinput.onchange = function () {
     if (subLoaddmSI !== undefined) {
         clearInterval(subLoaddmSI);
         subLoaddmSI = undefined;
+        initializeShowDM();
+        initializeBottomDM();
+        isplay = false;
+        play.classList.remove("mpip");
     }
+    initializeCaptionList();
     findxml();
 };
 var getFiles = function () {
@@ -423,7 +428,56 @@ getDMButton.onclick = function () {
             console.log(ex);
         },
         success: function (data) {
-            console.log("获取：" + data);
+            alert("获取成功");
+			findxml();
         }
     });
+}
+var captionList = document.getElementById("captionList");
+function initializeCaptionList() {
+    var allCaptions = document.querySelectorAll('.caption,.line');
+    allCaptions.forEach(element => {
+        captionList.removeChild(element);
+    });
+}
+var loadCaptions = function (captions) {
+    for (let i = 0; i < captions.length; i++) {
+        let object = captions[i];
+        var caption = document.createElement('div');
+        var captionTime = document.createElement('span');
+        var captionText = document.createElement('span');
+        captionTime.innerHTML = timeToMinute(object.stime);
+        captionText.innerHTML = object.text;
+        caption.classList.add("caption");
+		caption.style.color = object.color;
+        captionText.style.display = 'inline-block';
+        captionText.style.margin = '5px 20px';
+        caption.append(captionTime);
+        caption.append(captionText);
+
+        caption.addEventListener('click', function () {
+            audioSrc.currentTime = object.stime;
+            mpl.style.width = (audioSrc.currentTime / audioSrc.duration * 100).toFixed(2) + "%";
+            isDragProgressBar = true;
+            audioSrc.play();
+        });
+        var line = document.createElement('div');
+        line.classList.add("line");
+        $('#captionList').append(caption);
+        $('#captionList').append(line);
+
+    }
+}
+
+var fullScreen = document.getElementById("fullScreen");
+fullScreen.onclick = function () {
+    if (captionList.style.display === 'none')
+        captionList.style.display = "block";
+    else
+        captionList.style.display = "none";
+}
+
+function IsVisible(obj) {
+    if (obj.style.display === 'none') return false;
+    else return true;
 }

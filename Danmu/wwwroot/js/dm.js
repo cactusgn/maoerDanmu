@@ -39,7 +39,7 @@ var dmSpeed = 150;
 //设置页面图片
 //screenItem.style.backgroundImage = "../img/cover.jpg";
 var playcontrol = function () {
-    if (isplay) {
+    if (isplay && !IsVisible(captionList)) {
         audioSrc.pause();
         isplay = false;
         play.classList.remove("mpip");
@@ -202,6 +202,9 @@ var processDanmu = function (data) {
             });
             alldm.sort((x, y) => x.stime - y.stime);
             loaddm();
+            tempdm = alldm.filter(x => (x.mode == 4)).sort((x, y) => x.stime - y.stime);
+            loadCaptions(tempdm);
+            captionList.style.display = "none";
         }
     });
 }
@@ -334,7 +337,7 @@ var getTop = function (text, delaytime) {
     }
     if (findline) {
         return {
-            top: (line + 1) * (fontsize + margin) + 15,
+            top: line * (fontsize + margin) + 5,
             calcWidth: calcWidth
         };
     } else {
@@ -385,6 +388,7 @@ urlinput.onchange = function () {
         isplay = false;
         play.classList.remove("mpip");
     }
+    initializeCaptionList();
     findxml();
 };
 var getFiles = function () {
@@ -424,8 +428,56 @@ getDMButton.onclick = function () {
             console.log(ex);
         },
         success: function (data) {
-			alert("获取成功");
+            alert("获取成功");
 			findxml();
         }
     });
+}
+var captionList = document.getElementById("captionList");
+function initializeCaptionList() {
+    var allCaptions = document.querySelectorAll('.caption,.line');
+    allCaptions.forEach(element => {
+        captionList.removeChild(element);
+    });
+}
+var loadCaptions = function (captions) {
+    for (let i = 0; i < captions.length; i++) {
+        let object = captions[i];
+        var caption = document.createElement('div');
+        var captionTime = document.createElement('span');
+        var captionText = document.createElement('span');
+        captionTime.innerHTML = timeToMinute(object.stime);
+        captionText.innerHTML = object.text;
+        caption.classList.add("caption");
+		caption.style.color = object.color;
+        captionText.style.display = 'inline-block';
+        captionText.style.margin = '5px 20px';
+        caption.append(captionTime);
+        caption.append(captionText);
+
+        caption.addEventListener('click', function () {
+            audioSrc.currentTime = object.stime;
+            mpl.style.width = (audioSrc.currentTime / audioSrc.duration * 100).toFixed(2) + "%";
+            isDragProgressBar = true;
+            audioSrc.play();
+        });
+        var line = document.createElement('div');
+        line.classList.add("line");
+        $('#captionList').append(caption);
+        $('#captionList').append(line);
+
+    }
+}
+
+var fullScreen = document.getElementById("fullScreen");
+fullScreen.onclick = function () {
+    if (captionList.style.display === 'none')
+        captionList.style.display = "block";
+    else
+        captionList.style.display = "none";
+}
+
+function IsVisible(obj) {
+    if (obj.style.display === 'none') return false;
+    else return true;
 }
