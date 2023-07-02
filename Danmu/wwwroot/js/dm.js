@@ -36,38 +36,45 @@ var play = document.getElementById("mpi");
 var screenItem = document.getElementById("screen");
 var isplay = false;
 var dmSpeed = 150;
+var InitPlay = true;
 //设置页面图片
 //screenItem.style.backgroundImage = "../img/cover.jpg";
-var playcontrol = function () {
-    if (isplay && !IsVisible(captionList)) {
-        audioSrc.pause();
-        isplay = false;
-        play.classList.remove("mpip");
-        var x = document.querySelectorAll('.box,.bottomDm');
-        if (x) {
-            for (let i = 0; i < x.length; i++) {
-                x[i].style.animationPlayState = 'paused';
-            }
-        }
-    }
-    else {
-        if (audioSrc.src !== "") {
-            audioSrc.play();
-            isplay = true;
-            play.classList.add("mpip");
+var playControl = function (source) {
+    if (!InitPlay) {
+        if (isplay && (source === "button" || (source === "screen" && !IsVisible(captionList)))) {
+            audioSrc.pause();
+            isplay = false;
+            play.classList.remove("mpip");
             var x = document.querySelectorAll('.box,.bottomDm');
             if (x) {
                 for (let i = 0; i < x.length; i++) {
-                    x[i].style.animationPlayState = '';
+                    x[i].style.animationPlayState = 'paused';
                 }
             }
+        }
+        else {
+            if (audioSrc.src !== "" && audioSrc.src.indexOf("dm.html") === -1) {
+                audioSrc.play();
+                isplay = true;
+                play.classList.add("mpip");
+                var x = document.querySelectorAll('.box,.bottomDm');
+                if (x) {
+                    for (let i = 0; i < x.length; i++) {
+                        x[i].style.animationPlayState = '';
+                    }
+                }
 
+            }
         }
     }
 }
-play.onclick = playcontrol;
-screenItem.onclick = playcontrol;
 
+var playControlButton = function () {
+    playControl('button');
+}
+var playControlScreen = function () {
+    playControl('screen');
+}
 // 秒转换时分钟00:00:00格式
 function timeToMinute(times) {
     var t;
@@ -292,7 +299,7 @@ var loaddm = function () {
 }
 var totalHeight = screen.height;
 var margin = 5;
-var fontsize = 30;
+var fontsize = 20;
 var totalLines = parseInt(totalHeight / (fontsize + 2 * margin)) - 2;
 var bottomDm = [];
 var allshowDm = [];
@@ -315,7 +322,7 @@ var getTop = function (text, delaytime) {
     let findline = false;
     var tempObj = document.createElement("span");
     tempObj.innerHTML = text;
-    tempObj.style.fontSize = '24px';
+    tempObj.style.fontSize = '20px';
     $('body').append(tempObj);
     let calcWidth = tempObj.offsetWidth;
     tempObj.parentNode.removeChild(tempObj);
@@ -429,7 +436,7 @@ getDMButton.onclick = function () {
         },
         success: function (data) {
             alert("获取成功");
-			findxml();
+            findxml();
         }
     });
 }
@@ -449,7 +456,7 @@ var loadCaptions = function (captions) {
         captionTime.innerHTML = timeToMinute(object.stime);
         captionText.innerHTML = object.text;
         caption.classList.add("caption");
-		caption.style.color = object.color;
+        caption.style.color = object.color;
         captionText.style.display = 'inline-block';
         captionText.style.margin = '5px 20px';
         caption.append(captionTime);
@@ -481,3 +488,7 @@ function IsVisible(obj) {
     if (obj.style.display === 'none') return false;
     else return true;
 }
+
+play.onclick = playControlButton;
+screenItem.onclick = playControlScreen;
+InitPlay = false;
