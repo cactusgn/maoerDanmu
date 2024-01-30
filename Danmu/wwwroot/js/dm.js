@@ -79,7 +79,7 @@ var playControlScreen = function () {
     playControl('screen')
 }
 // 秒转换时分钟00:00:00格式
-function timeToMinute (times) {
+function timeToMinute(times) {
     var t
     if (times > -1) {
         var hour = Math.floor(times / 3600)
@@ -105,7 +105,7 @@ function timeToMinute (times) {
 }
 
 // 00:00:00时分秒格式转化为秒
-function timeEvent (e) {
+function timeEvent(e) {
     let time = e
     var len = time.split(':')
     if (len.length == 3) {
@@ -138,7 +138,7 @@ document.addEventListener('click', function (e) {
     }
 })
 
-function getElementPageLeft (element) {
+function getElementPageLeft(element) {
     var actualLeft = element.offsetLeft
     var parent = element.offsetParent
     while (parent != null) {
@@ -147,7 +147,7 @@ function getElementPageLeft (element) {
     }
     return actualLeft
 }
-function getElementPageTop (element) {
+function getElementPageTop(element) {
     var actualTop = element.offsetTop
     var parent = element.offsetParent
     while (parent != null) {
@@ -160,7 +160,7 @@ function getElementPageTop (element) {
 
 
 
-function isFileExisted (url) {
+function isFileExisted(url) {
     var isExists
     $.ajax({
         url: url,
@@ -372,12 +372,8 @@ var getBottom = function (text, delaytime) {
             }
         }
     }
-    let basicHeight = 5
-    if (document.body.clientHeight < 800) {
-        basicHeight = 55
-    }
     if (findline) {
-        return line * (fontsize + margin) + basicHeight
+        return line * (fontsize + margin) + 5
     } else {
         return null
     }
@@ -393,6 +389,7 @@ var findxml = function () {
 }
 //var findxmlInterval = setInterval(findxml, (1000));
 urlinput.onchange = function () {
+    getCachedDMId(urlinput.options[urlinput.selectedIndex].text)
     audioSrc.src = urlinput.value
     if (subLoaddmSI !== undefined) {
         clearInterval(subLoaddmSI)
@@ -404,6 +401,18 @@ urlinput.onchange = function () {
     }
     initializeCaptionList()
     findxml()
+}
+var getCachedDMId = function (filename) {
+    $.ajax({
+        url: "/Home/GetCachedDMId?filename=" + filename,
+        async: false,
+        error: function (ex) {
+            console.log(ex)
+        },
+        success: function (data) {
+            idinput.value = data
+        }
+    })
 }
 var getFiles = function () {
     $.ajax({
@@ -454,7 +463,7 @@ getPicBtn.onclick = function () {
     screenItem.style.backgroundImage = "url(" + picinput.value + ") no-repeat auto 100% center"
 }
 var captionList = document.getElementById("captionList")
-function initializeCaptionList () {
+function initializeCaptionList() {
     var allCaptions = document.querySelectorAll('.caption,.line')
     allCaptions.forEach(element => {
         captionList.removeChild(element)
@@ -497,7 +506,7 @@ fullScreen.onclick = function () {
         captionList.style.display = "none"
 }
 
-function IsVisible (obj) {
+function IsVisible(obj) {
     if (obj.style.display === 'none') return false
     else return true
 }

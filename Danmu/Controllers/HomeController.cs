@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,16 +12,56 @@ namespace Danmu.Controllers
     [Route("[controller]/[action]")]
     public class HomeController : Controller
     {
-    [Route("/")]
+        [Route("/")]
         public void Index()
         {
             Response.Redirect("dm.html");
         }
-        
+        private static readonly IMemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
+        private static readonly object _lockObject = new object();
+        private static Dictionary<string, string> _staticList;
+
+        public static Dictionary<string,string> FileIdDictionary
+        {
+            get
+            {
+                if (_staticList == null)
+                {
+                    lock (_lockObject)
+                    {
+                        if (_staticList == null)
+                        {
+                            _staticList = new Dictionary<string, string>();
+                            _cache.Set("FileIdDictionary", _staticList, new MemoryCacheEntryOptions());
+                        }
+                    }
+                }
+                return _staticList;
+            }
+        }
+        public string GetCachedDMId(string filename)
+        {
+            if (FileIdDictionary.ContainsKey(filename))
+            {
+                return FileIdDictionary[filename];
+            }
+            else
+            {
+                return "";
+            }
+        }
         public bool GetBlobDownload([FromQuery] string id,string filename)
         {
             try
             {
+                if( FileIdDictionary.ContainsKey(id) )
+                {
+                    FileIdDictionary[filename] = id;
+                }
+                else
+                {
+                    FileIdDictionary.Add(filename, id);
+                }
                 var net = new System.Net.WebClient();
                 net.DownloadFile("https://www.missevan.com/sound/getdm?soundid=" + id, System.Environment.CurrentDirectory + "\\wwwroot\\files\\" + filename.Substring(0, filename.Length - 3) + "xml");
                 return true;
