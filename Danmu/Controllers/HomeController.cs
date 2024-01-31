@@ -32,7 +32,9 @@ namespace Danmu.Controllers
                         if (_staticList == null)
                         {
                             _staticList = new Dictionary<string, string>();
-                            _cache.Set("FileIdDictionary", _staticList, new MemoryCacheEntryOptions());
+                            MemoryCacheEntryOptions options = new MemoryCacheEntryOptions();
+                            options.AbsoluteExpiration = DateTimeOffset.UtcNow.AddDays(1000);
+                            _cache.Set("FileIdDictionary", _staticList, options);
                         }
                     }
                 }
